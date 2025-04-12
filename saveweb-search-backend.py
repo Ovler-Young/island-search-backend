@@ -75,7 +75,7 @@ def load_limiter(func):
                     },
                 ],
                 'error': '丑搜当前荷载过高，请稍后再试',
-            }, headers={'Retry-After': '30'})
+            }, status_code=503, headers={'Retry-After': '30'})
         return await func(*args, **kwargs)
     return wrapper
 
