@@ -176,12 +176,7 @@ async def get_meili_max_id() -> int:
 async def stats():
     stats = await client.index(INDEX_NAME).get_stats()
     max_id = await get_meili_max_id()
-    # us to date
-    last_indexed_at = datetime.fromtimestamp(max_id / 1000000, tz=timezone.utc)
-    return {"db_stats":stats,"max_id":max_id,"last_indexed_at":last_indexed_at.isoformat()}
-
-    
-    
+    return {"db_stats": stats, "max_id": max_id}
 
 @app.get('/api/search')
 @load_limiter
