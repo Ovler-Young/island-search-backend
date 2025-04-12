@@ -18,6 +18,8 @@ MEILI_KEY = os.getenv('MEILI_KEY', '')
 print('$MEILI_KEY', 'set' if MEILI_KEY else 'not set')
 MEILI_URL = os.getenv('MEILI_URL', 'http://127.0.0.1:7700')
 print('$MEILI_URL', MEILI_URL)
+INDEX_NAME = os.getenv('MEILI_INDEX', 'entries')
+print('$MEILI_INDEX', INDEX_NAME)
 STWP_SEARCH_MAX_LOAD = float(os.getenv('STWP_SEARCH_MAX_LOAD')) if os.getenv('STWP_SEARCH_MAX_LOAD') else (
     os.cpu_count() / 1.5 if os.cpu_count() else 1.5
 )
@@ -42,7 +44,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-INDEX_NAME = "entry"
 
 
 async def get_load():
