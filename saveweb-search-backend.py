@@ -196,7 +196,10 @@ async def search(q: str = '', p: int = 0, f: str = 'false', h: str = 'false', so
     opt_params = {
         'limit': 10,
         'offset': 10 * page,
-        'attributes_to_retrieve': ['id', 'id_feed', 'title', 'content', 'link', 'date', 'tags', 'author', 'lastSeen', 'content_length'],
+        'attributes_to_retrieve': [
+            'id', '_id', 'fid', 'name', 'title', 'content', 'now', 'userid', 'type',
+            'parent', 'replyCount', 'img', 'ext'
+        ],
     }
 
     # sort
@@ -223,7 +226,7 @@ async def search(q: str = '', p: int = 0, f: str = 'false', h: str = 'false', so
         opt_params['crop_length'] = 120
 
     if highlight:
-        opt_params['attributes_to_highlight'] = ['title', 'content', 'date', 'tags', 'author']
+        opt_params['attributes_to_highlight'] = ['title', 'name', 'content', 'userid']
         opt_params['highlight_pre_tag'] = '<span class="uglyHighlight text-purple-500">'
         opt_params['highlight_post_tag'] = '</span>'
 
