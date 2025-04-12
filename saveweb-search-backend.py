@@ -294,7 +294,7 @@ async def search(q: str = '', p: int = 0, f: str = 'false', h: str = 'false', so
             ],
             'error': '数据库错误: ' + e.message,
         }
-
+    processed_hits = []
     for hit in _results.hits:
         # replace the hit with _formatted
         if '_formatted' in hit:
