@@ -151,13 +151,48 @@ async def go_back_home():
 @app.get('/api/entry/{entry_id}')
 @load_limiter
 @ops_limiter
-async def article(entry_id: int):
-    results = {}
-    results['data'] = await client.index(INDEX_NAME).get_document(entry_id)
-    results['humans.txt'] = 'is_favorite 目前与主数据库不同步'
+async def article(entry_id: str):
+    try:
+        document = await client.index(INDEX_NAME).get_document(entry_id)
+        
+        if 'type' in document:
+            if document['type'] == 'thread':
+                document['link'] = f"https://www.nmbxd.com/t/{document['id']}"
+            elif document['type'] == 'reply':
+                document['link'] = f"https://www.nmbxd.com/t/{document['parent']}?r={document['id']}"
 
-    return results
+        if 'content' in document:
+            document['content_length'] = len(document['content'])
 
+        document['id_feed'] = document.get('_id', '')
+        document['date'] = document.get('now', 0)
+        document['tags'] = document.get('fid', '')
+        document['author'] = document.get('userid', '')
+        
+        # title formatting
+        document['new_title'] = f"#{str(document['id'])} - "
+        if document['name'] != '无名氏':
+            document['new_title'] += document['name']
+        else:
+            document['new_title'] += f"#{document['userid']}"
+        if document['title'] != '无标题':
+            document['new_title'] += f" - {document['title']}"
+        document['title'] = document['new_title']
+        del document['new_title']
+
+        return {
+            'data': document,
+            'humans.txt': 'Note: Fields mapped to maintain compatibility with old structure.'
+        }
+    except meilisearch_python_sdk.errors.MeilisearchApiError as e:
+        if e.code == 'document_not_found':
+            return JSONResponse({'error': f'Entry with ID {entry_id} not found.'}, status_code=404)
+        else:
+            print(f"Error fetching entry {entry_id}: {e}")
+            return JSONResponse({'error': 'Error retrieving entry from database.'}, status_code=500)
+    except Exception as e:
+        print(f"Unexpected error fetching entry {entry_id}: {e}")
+        return JSONResponse({'error': 'An unexpected error occurred.'}, status_code=500)
 async def get_meili_max_id() -> int:
     r = await client.index(INDEX_NAME).search(
         query="",
