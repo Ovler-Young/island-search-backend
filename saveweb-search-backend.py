@@ -181,20 +181,18 @@ async def stats():
 @app.get('/api/search')
 @load_limiter
 @ops_limiter
-async def search(q: str = 'saveweb', p: int = 0, f: str = 'false', h: str = 'false', sort: str = ""):
+async def search(q: str = '', p: int = 0, f: str = 'false', h: str = 'false', sort: str = ""):
     query = q  # 搜索词
     page = p  # 0-based
     fulltext = f == 'true' # 返回全文（搜索还是以全文做搜索，只是返回的时候限制一下长度）
     highlight = h == 'true'  # 高亮
-
-    print(query, page, 'fulltext:', fulltext, 'highlight:', highlight)
+    print(f"Search query: '{query}', page: {page}, fulltext: {fulltext}, highlight: {highlight}, sort: '{sort}'")
     with open('search.log', 'a') as fio:
         fio.write(query + '\t' + str(page) + '\n')
 
     # 搜空，返空
     if not query:
-        return {'error': '搜索词为空'}
-
+        return {'hits': [], 'estimatedTotalHits': 0, 'estimated_total_hits': 0, 'query': query, 'error': '搜索词为空'}
     opt_params = {
         'limit': 10,
         'offset': 10 * page,
