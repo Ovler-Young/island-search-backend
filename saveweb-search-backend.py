@@ -47,10 +47,18 @@ app.add_middleware(
 
 
 async def get_load():
-    with open('/proc/loadavg', 'r') as f:
-        load = f.read().split()[0]
-    return float(load)
-
+    # Check if /proc/loadavg exists (for non-Linux compatibility)
+    if os.path.exists('/proc/loadavg'):
+        try:
+            with open('/proc/loadavg', 'r') as f:
+                load = f.read().split()[0]
+            return float(load)
+        except Exception as e:
+            print(f"[WARN] Could not read load average: {e}")
+            return 0.0
+    else:
+        print("[WARN] /proc/loadavg not found. Load limiting disabled.")
+        return 0.0
 def load_limiter(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
