@@ -265,21 +265,46 @@ async def search(q: str = '', p: int = 0, f: str = 'false', h: str = 'false', so
         if '_formatted' in hit:
             hit.update(hit['_formatted'])
             del hit['_formatted']
+        
+        # Map new schema fields to old schema fields for compatibility
+        # ID mapping
+        hit['id_feed'] = hit.get('_id', '')
 
-        hit['author'] = '' if not hit['author'] else ';' +' ;'.join(hit['author'])
-        hit['tags'] = '' if not hit['tags'] else '#' + ' #'.join(hit['tags'])
-
-        try:
-            # TODO: 直接存解码好的
-            hit['link'] = html_unescape(hit['link'])
-        except Exception as e:
-            print('html_unescape error:', e)
-            pass
-
+        # Generate title based on name/title
+        formatted_title = f"#{str(hit['id'])} - "
+        if hit.get('name', '无名氏') != '无名氏':
+            formatted_title += hit['name']
+        else:
+            formatted_title += f"#{hit.get('userid', '')}"
+        if hit.get('title', '无标题') != '无标题':
+            formatted_title += f" - {hit['title']}"
+        hit['title'] = formatted_title
+        
+        hit['date'] = hit.get('now', 0)
+        
+        hit['tags'] = [str(hit.get('fid', ''))] if hit.get('fid') is not None else []
+        
+        hit['author'] = [hit.get('userid', '')] if hit.get('userid') else []
+        
+        if 'content' in hit:
+            hit['content_length'] = len(hit['content'])
+        
+        if hit.get('type') == 'thread':
+            hit['link'] = f"https://www.nmbxd.com/t/{hit['id']}"
+        elif hit.get('type') == 'reply':
+            parent_id = hit.get('parent')
+            hit['link'] = f"https://www.nmbxd.com/t/{parent_id}?r={hit['id']}" if parent_id else ""
+        else:
+            hit['link'] = ""
+        processed_hits.append(hit)
     results = {
-        'hits': _results.hits,
+        'hits': processed_hits,
         'estimatedTotalHits': _results.estimated_total_hits, #TODO: estimatedTotalHits 改为 estimated_total_hits
         'estimated_total_hits': _results.estimated_total_hits,
+        'query': query,
+        'page': page,
+        'limit': opt_params['limit'],
+        'processingTimeMs': _results.processing_time_ms,
         'humans.txt': '使用 API 时请检查 error 字段，高荷载/出错时会返回它',
     }
 
