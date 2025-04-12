@@ -317,10 +317,10 @@ async def search(q: str = '', p: int = 0, f: str = 'false', h: str = 'false', so
         
         hit['date'] = hit.get('now', 0)
         
-        hit['tags'] = [str(hit.get('fid', ''))] if hit.get('fid') is not None else []
-        
-        hit['author'] = [hit.get('userid', '')] if hit.get('userid') else []
-        
+        hit['tags'] = f'#{hit['fid']};'
+
+        hit['author'] = f';{hit['userid']}'
+
         if 'content' in hit:
             hit['content_length'] = len(hit['content'])
         
