@@ -1,0 +1,9 @@
+.git
+.github
+.venv
+__pycache__
+*.py[cod]
+search.log
+.vscode
+.idea
+README.md
