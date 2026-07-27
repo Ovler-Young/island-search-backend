@@ -280,8 +280,8 @@ async def search(q: str = 'saveweb', p: int = 0, f: str = 'false', h: str = 'fal
 
     return results
 
-@app.route('/')
-async def root(request):
+@app.get('/')
+async def root():
     return HTMLResponse(open('templates/index.html', 'r').read()) # 反正只有一个页面
 
 async def main():
