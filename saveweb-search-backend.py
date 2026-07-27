@@ -42,7 +42,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-INDEX_NAME = "entry"
+INDEX_NAME = "nmbxd"
 
 
 async def get_load():

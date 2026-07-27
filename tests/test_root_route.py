@@ -17,3 +17,7 @@ def test_root_route_returns_html():
 
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/html")
+
+
+def test_uses_nmbxd_meilisearch_index():
+    assert APPLICATION.INDEX_NAME == "nmbxd"
