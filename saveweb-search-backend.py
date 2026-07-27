@@ -43,6 +43,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 INDEX_NAME = "nmbxd"
+SEARCH_FIELDS = [
+    "_id", "id", "fid", "ext", "now", "name", "title", "content",
+    "parent", "type", "userid",
+]
 
 
 async def get_load():
@@ -194,7 +198,7 @@ async def search(q: str = 'saveweb', p: int = 0, f: str = 'false', h: str = 'fal
     opt_params = {
         'limit': 10,
         'offset': 10 * page,
-        'attributes_to_retrieve': ['id', 'id_feed', 'title', 'content', 'link', 'date', 'tags', 'author', 'lastSeen', 'content_length'],
+        'attributes_to_retrieve': SEARCH_FIELDS,
     }
 
     # sort
@@ -221,7 +225,7 @@ async def search(q: str = 'saveweb', p: int = 0, f: str = 'false', h: str = 'fal
         opt_params['crop_length'] = 120
 
     if highlight:
-        opt_params['attributes_to_highlight'] = ['title', 'content', 'date', 'tags', 'author']
+        opt_params['attributes_to_highlight'] = ['title', 'content']
         opt_params['highlight_pre_tag'] = '<span class="uglyHighlight text-purple-500">'
         opt_params['highlight_post_tag'] = '</span>'
 
@@ -261,15 +265,12 @@ async def search(q: str = 'saveweb', p: int = 0, f: str = 'false', h: str = 'fal
             hit.update(hit['_formatted'])
             del hit['_formatted']
 
-        hit['author'] = '' if not hit['author'] else ';' +' ;'.join(hit['author'])
-        hit['tags'] = '' if not hit['tags'] else '#' + ' #'.join(hit['tags'])
-
-        try:
-            # TODO: 直接存解码好的
-            hit['link'] = html_unescape(hit['link'])
-        except Exception as e:
-            print('html_unescape error:', e)
-            pass
+        hit['title'] = hit.get('title') or hit.get('name', '')
+        hit['content'] = hit.get('content', '')
+        hit['author'] = hit.get('userid', '')
+        hit['tags'] = ''
+        hit['date'] = hit.get('now', 0)
+        hit['link'] = html_unescape(hit.get('link') or '#')
 
     results = {
         'hits': _results.hits,
