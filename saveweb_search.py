@@ -188,8 +188,6 @@ async def search(q: str = 'saveweb', p: int = 0, f: str = 'false', h: str = 'fal
     highlight = h == 'true'  # 高亮
 
     print(query, page, 'fulltext:', fulltext, 'highlight:', highlight)
-    with open('search.log', 'a') as fio:
-        fio.write(query + '\t' + str(page) + '\n')
 
     # 搜空，返空
     if not query:

@@ -5,7 +5,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 
-APPLICATION_PATH = Path(__file__).parents[1] / "saveweb-search-backend.py"
+APPLICATION_PATH = Path(__file__).parents[1] / "saveweb_search.py"
 SPEC = importlib.util.spec_from_file_location("application", APPLICATION_PATH)
 assert SPEC is not None
 assert SPEC.loader is not None

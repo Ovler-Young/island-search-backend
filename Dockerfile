@@ -7,15 +7,14 @@ ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
     PATH="/app/.venv/bin:$PATH"
 
-COPY requirements.txt ./
+COPY pyproject.toml uv.lock ./
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv venv /app/.venv && \
-    uv pip install --python /app/.venv/bin/python --requirement requirements.txt
+    uv sync --locked --no-install-project
 
-COPY saveweb-search-backend.py ./
+COPY saveweb_search.py ./
 COPY templates ./templates
 
 EXPOSE 8077
 
-CMD ["python", "saveweb-search-backend.py"]
+CMD ["python", "saveweb_search.py"]
