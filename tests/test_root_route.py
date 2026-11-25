@@ -74,3 +74,45 @@ def test_search_adapts_nmbxd_fields_for_the_frontend(monkeypatch):
         "date": 1_700_000_000,
         "link": "#",
     }]
+
+
+class FakeDocuments:
+    def __init__(self, results):
+        self.results = results
+
+
+class FakeEntryIndex:
+    def __init__(self, documents):
+        self.documents = documents
+
+    async def get_documents(self, **kwargs):
+        assert kwargs["filter"] == "id = 42"
+        return FakeDocuments(self.documents)
+
+
+class FakeEntryClient:
+    def __init__(self, documents):
+        self.documents = documents
+
+    def index(self, index_name):
+        assert index_name == "nmbxd"
+        return FakeEntryIndex(self.documents)
+
+
+def test_entry_is_looked_up_by_post_number(monkeypatch):
+    monkeypatch.setattr(APPLICATION, "client", FakeEntryClient([{"_id": "post-1", "id": 42}]))
+    monkeypatch.setattr(APPLICATION, "get_load", no_load)
+
+    response = TestClient(APPLICATION.app).get("/api/entry/42")
+
+    assert response.status_code == 200
+    assert response.json()["data"] == {"_id": "post-1", "id": 42}
+
+
+def test_unknown_entry_returns_not_found(monkeypatch):
+    monkeypatch.setattr(APPLICATION, "client", FakeEntryClient([]))
+    monkeypatch.setattr(APPLICATION, "get_load", no_load)
+
+    response = TestClient(APPLICATION.app).get("/api/entry/42")
+
+    assert response.status_code == 404

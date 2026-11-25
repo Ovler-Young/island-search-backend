@@ -6,7 +6,7 @@ import asyncio
 import os
 import time
 
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 
@@ -148,7 +148,12 @@ async def go_back_home():
 @ops_limiter
 async def article(entry_id: int):
     results = {}
-    results['data'] = await client.index(INDEX_NAME).get_document(entry_id)
+    # The index's primary key is the database's own `_id`; the number in the
+    # URL is the post number stored in `id`, so look the post up by that field.
+    documents = await client.index(INDEX_NAME).get_documents(filter=f'id = {entry_id}', limit=1)
+    if not documents.results:
+        raise HTTPException(status_code=404, detail='entry not found')
+    results['data'] = documents.results[0]
     results['humans.txt'] = 'is_favorite 目前与主数据库不同步'
 
     return results
